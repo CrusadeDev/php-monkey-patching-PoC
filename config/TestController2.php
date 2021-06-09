@@ -10,15 +10,12 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TestController extends AbstractController
 {
-    /**
-     * @Route("/lucky/{max}", name="app_lucky_number")
-     */
     public function number(): Response
     {
-        $number = random_int(101, 101);
+        $number = random_int(100, 100);
 
         return new Response(
-            '<br><html><body>Lucky number: '.$number.'</body></html>'
+            '<br><html><body>Lucky: '.$number.'</body></html>'
         );
     }
 }

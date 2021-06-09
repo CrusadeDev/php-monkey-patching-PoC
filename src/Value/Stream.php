@@ -13,7 +13,7 @@ class Stream
     const OUTPUT_DESTINATION = 'php://memory';
     const OUTPUT_ACCESS_MODE = 'rb+';
 
-    protected static $protocols = ['file', 'phar'];
+    protected static $protocols = ['file'];
 
     public $context;
     public $resource;
@@ -22,7 +22,7 @@ class Stream
     {
         $this->unwrap();
         $including = (bool)($options & self::STREAM_OPEN_FOR_INCLUDE);
-        if (strpos($path,'TestController.php')) {
+        if (strpos($path, 'TestController.php')) {
             $this->resource = $this->transformAndOpen($path);
             $this->wrap();
 
@@ -52,45 +52,17 @@ class Stream
 
     public function transformAndOpen(string $file)
     {
-        $resource = fopen(self::OUTPUT_DESTINATION, self::OUTPUT_ACCESS_MODE);
-        $code = file_get_contents($file, true);
-        $code = '<?php
+        $resource = fopen('/srv/app/config/TestController2.php', self::OUTPUT_ACCESS_MODE);
 
-declare(strict_types=1);
-
-namespace App\Controller;
-
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-
-class TestController extends AbstractController
-{
-    /**
-     * @Route(\"/lucky/{max}\", name=\"app_lucky_number\")
-     */
-    public function number(): Response
-    {
-        $number = random_int(100, 100);
-
-        return new Response(
-            \'<br><html><body>Lucky: \'.$number.\'</body></html>\'
-        );
-    }
-}
-';
-        fwrite($resource, $code);
-        rewind($resource);
+        self::unwrap();
 
         return $resource;
     }
 
     public static function wrap()
     {
-        foreach (static::$protocols as $protocol) {
-            stream_wrapper_unregister($protocol);
-            stream_wrapper_register($protocol, get_called_class());
-        }
+        stream_wrapper_unregister('file');
+        stream_wrapper_register('file', __CLASS__);
     }
 
     public function stream_close()
